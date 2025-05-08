@@ -14,22 +14,17 @@ function ensureKeyDir() {
     fs.mkdirSync(KEY_DIR, { recursive: true });
   }
 
-  // Ensure keys are properly managed in .gitignore
+  // Ensure keys are properly excluded in .gitignore
   const gitignorePath = path.join(__dirname, '../../.gitignore');
   if (fs.existsSync(gitignorePath)) {
     const gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
-    if (!gitignoreContent.includes('/keys/private') && !gitignoreContent.includes('/keys/*.key')) {
-      console.warn('\x1b[33m%s\x1b[0m', 'WARNING: private keys may not be properly ignored in .gitignore!');
-      console.warn('\x1b[33m%s\x1b[0m', 'Please ensure your .gitignore contains rules to ignore private keys while allowing public keys.');
-      console.warn('\x1b[33m%s\x1b[0m', 'Recommended configuration:');
-      console.warn('\x1b[33m%s\x1b[0m', '/keys/private*');
-      console.warn('\x1b[33m%s\x1b[0m', '/keys/*private*');
-      console.warn('\x1b[33m%s\x1b[0m', '/keys/*.key');
-      console.warn('\x1b[33m%s\x1b[0m', '!/keys/public*');
+    if (!gitignoreContent.includes('/keys/')) {
+      console.warn('\x1b[33m%s\x1b[0m', 'WARNING: keys directory not found in .gitignore!');
+      console.warn('\x1b[33m%s\x1b[0m', 'Add "/keys/" to your .gitignore file to prevent accidentally committing keys.');
     }
   }
 
-  // Add a README in the keys directory to explain the security practice
+  // Add a README in the keys directory to explain how to handle keys
   const keysReadmePath = path.join(KEY_DIR, 'README.md');
   if (!fs.existsSync(keysReadmePath)) {
     const readmeContent = `# Keys Directory
@@ -38,10 +33,13 @@ This directory contains cryptographic keys used by the application.
 
 ## Security Notice
 
-- **PRIVATE KEYS**: Never commit private keys to git repositories! These are excluded from git tracking.
-- **PUBLIC KEYS**: Public keys are safe to share and are tracked in the repository.
+- This entire directory is excluded from git tracking.
+- For deployment, you'll need to manually configure keys on each environment.
+- Never commit keys to git repositories as they contain sensitive information.
 
-The .gitignore configuration is set up to ignore private keys while tracking public keys.
+## Key Distribution
+
+Share the public key through secure channels for integration with other systems.
 `;
     fs.writeFileSync(keysReadmePath, readmeContent);
     console.log('Created README.md in keys directory with security guidelines');
@@ -81,8 +79,8 @@ function generateKeyPair() {
   fs.writeFileSync(PRIVATE_KEY_PATH, privateKey);
   fs.writeFileSync(PUBLIC_KEY_PATH, publicKey);
   console.log('Keys generated and saved to', KEY_DIR);
-  console.log('\x1b[32m%s\x1b[0m', 'IMPORTANT: Private key saved to ' + PRIVATE_KEY_PATH + ' - Keep this secure and never commit to git!');
-  console.log('\x1b[32m%s\x1b[0m', 'Public key saved to ' + PUBLIC_KEY_PATH + ' - This can be safely shared and committed to git.');
+  console.log('\x1b[32m%s\x1b[0m', 'IMPORTANT: Keys are generated in a directory that should be excluded from git!');
+  console.log('\x1b[32m%s\x1b[0m', 'For deployment or system integration, you must securely transfer these keys.');
 
   return { privateKey, publicKey };
 }
