@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SD-JWT Verifier</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 100px;
+            font-family: monospace;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        pre {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 4px;
+            overflow: auto;
+            max-height: 300px;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>SD-JWT Verifier</h1>
+    <div class="container">
+        <p>
+            This tool verifies SD-JWT format tokens and displays their content, including any selective disclosures.
+        </p>
+
+        <label for="sdJwt">Paste your SD-JWT token below:</label>
+        <textarea id="sdJwt" placeholder="Format: <JWT>~<disclosure>~<disclosure>~..."></textarea>
+
+        <label for="publicKey">Public Key (PEM format):</label>
+        <textarea id="publicKey" placeholder="-----BEGIN PUBLIC KEY-----
+...
+-----END PUBLIC KEY-----"></textarea>
+
+        <button id="verifyBtn">Verify Token</button>
+
+        <div id="result" style="margin-top: 20px;">
+            <h3>Verification Result:</h3>
+            <div id="verificationResult"></div>
+
+            <h3>Token Information:</h3>
+            <pre id="tokenInfo">Paste a token and click "Verify Token" to see information</pre>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('verifyBtn').addEventListener('click', function() {
+            const sdJwt = document.getElementById('sdJwt').value.trim();
+            const publicKey = document.getElementById('publicKey').value.trim();
+            const resultDiv = document.getElementById('verificationResult');
+            const tokenInfoDiv = document.getElementById('tokenInfo');
+
+            if (!sdJwt) {
+                resultDiv.innerHTML = '<p class="error">Please enter an SD-JWT token</p>';
+                return;
+            }
+
+            // Split the SD-JWT into its components: <JWT>~<disclosure>~<disclosure>~...
+            const parts = sdJwt.split('~');
+            const jwt = parts[0];
+            const disclosures = parts.slice(1);
+
+            console.log(disclosures);
+
+            try {
+                // Parse the JWT parts
+                const [headerB64, payloadB64, signature] = jwt.split('.');
+
+                // Decode header and payload
+                const header = JSON.parse(atob(headerB64));
+                const payload = JSON.parse(atob(payloadB64));
+
+                // Parse disclosures
+                const parsedDisclosures = disclosures.map(d => {
+                    try {
+                        return JSON.parse(atob(d));
+                    } catch (e) {
+                        return { error: "Invalid disclosure format", raw: d };
+                    }
+                });
+
+                console.log(parsedDisclosures);
+
+
+                // Display decoded information
+                resultDiv.innerHTML = '<p class="success">Token format is valid (signature verification requires server-side validation)</p>';
+                tokenInfoDiv.textContent = JSON.stringify({
+                    header,
+                    payload,
+                    disclosures: parsedDisclosures
+                }, null, 2);
+
+            } catch (e) {
+                resultDiv.innerHTML = `<p class="error">Error decoding token: ${e.message}</p>`;
+                tokenInfoDiv.textContent = "Failed to decode token";
+            }
+        });
+    </script>
+</body>
+</html>
