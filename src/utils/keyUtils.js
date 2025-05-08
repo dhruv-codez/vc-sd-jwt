@@ -7,28 +7,44 @@ const PRIVATE_KEY_PATH = path.join(KEY_DIR, 'private.pem');
 const PUBLIC_KEY_PATH = path.join(KEY_DIR, 'public.pem');
 
 /**
- * Ensures the key directory exists
+ * Ensures the key directory exists and has proper gitignore settings
  */
 function ensureKeyDir() {
   if (!fs.existsSync(KEY_DIR)) {
     fs.mkdirSync(KEY_DIR, { recursive: true });
   }
 
-  // Ensure keys are in .gitignore
+  // Ensure keys are properly managed in .gitignore
   const gitignorePath = path.join(__dirname, '../../.gitignore');
   if (fs.existsSync(gitignorePath)) {
     const gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
-    if (!gitignoreContent.includes('/keys/')) {
-      console.warn('\x1b[33m%s\x1b[0m', 'WARNING: keys directory not found in .gitignore. This could lead to accidental commit of private keys!');
-      console.warn('\x1b[33m%s\x1b[0m', 'Please add "/keys/" to your .gitignore file.');
+    if (!gitignoreContent.includes('/keys/private') && !gitignoreContent.includes('/keys/*.key')) {
+      console.warn('\x1b[33m%s\x1b[0m', 'WARNING: private keys may not be properly ignored in .gitignore!');
+      console.warn('\x1b[33m%s\x1b[0m', 'Please ensure your .gitignore contains rules to ignore private keys while allowing public keys.');
+      console.warn('\x1b[33m%s\x1b[0m', 'Recommended configuration:');
+      console.warn('\x1b[33m%s\x1b[0m', '/keys/private*');
+      console.warn('\x1b[33m%s\x1b[0m', '/keys/*private*');
+      console.warn('\x1b[33m%s\x1b[0m', '/keys/*.key');
+      console.warn('\x1b[33m%s\x1b[0m', '!/keys/public*');
     }
   }
 
-  // Add a .gitignore file in the keys directory as an extra layer of protection
-  const keysGitignorePath = path.join(KEY_DIR, '.gitignore');
-  if (!fs.existsSync(keysGitignorePath)) {
-    fs.writeFileSync(keysGitignorePath, '# Ignore all files in this directory\n*\n!.gitignore\n');
-    console.log('Created .gitignore in keys directory for extra security');
+  // Add a README in the keys directory to explain the security practice
+  const keysReadmePath = path.join(KEY_DIR, 'README.md');
+  if (!fs.existsSync(keysReadmePath)) {
+    const readmeContent = `# Keys Directory
+
+This directory contains cryptographic keys used by the application.
+
+## Security Notice
+
+- **PRIVATE KEYS**: Never commit private keys to git repositories! These are excluded from git tracking.
+- **PUBLIC KEYS**: Public keys are safe to share and are tracked in the repository.
+
+The .gitignore configuration is set up to ignore private keys while tracking public keys.
+`;
+    fs.writeFileSync(keysReadmePath, readmeContent);
+    console.log('Created README.md in keys directory with security guidelines');
   }
 }
 
@@ -65,7 +81,8 @@ function generateKeyPair() {
   fs.writeFileSync(PRIVATE_KEY_PATH, privateKey);
   fs.writeFileSync(PUBLIC_KEY_PATH, publicKey);
   console.log('Keys generated and saved to', KEY_DIR);
-  console.log('\x1b[32m%s\x1b[0m', 'IMPORTANT: Never commit private keys to git repositories!');
+  console.log('\x1b[32m%s\x1b[0m', 'IMPORTANT: Private key saved to ' + PRIVATE_KEY_PATH + ' - Keep this secure and never commit to git!');
+  console.log('\x1b[32m%s\x1b[0m', 'Public key saved to ' + PUBLIC_KEY_PATH + ' - This can be safely shared and committed to git.');
 
   return { privateKey, publicKey };
 }

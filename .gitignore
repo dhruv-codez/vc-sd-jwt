@@ -135,5 +135,9 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Keys directory - contains sensitive private keys
-/keys/
+# Keys directory - manage only private keys
+/keys/private*
+/keys/*private*
+/keys/*.key
+# But keep tracking public keys
+!/keys/public*
