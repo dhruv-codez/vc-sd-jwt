@@ -4,12 +4,13 @@ A production-ready Node.js API for generating Verifiable Credentials using the S
 
 ## Features
 
-- Generates properly signed Verifiable Credentials with selective disclosure support
-- Uses RSA key pairs for secure JWT signing
-- Creates salted and hashed disclosures for credential fields
+- Generates cryptographically signed Verifiable Credentials with selective disclosure support
+- Uses RSA-256 (RS256) for secure JWT signing with 2048-bit keys
+- Implements SHA-256 hashing for credential field disclosures
+- Creates salted and hashed disclosures with cryptographically secure random values
 - Returns the complete SD-JWT format with encoded disclosures
-- Includes a simple verification page for testing
-- Customizable issuer and holder identifiers
+- Provides web-based verification interface for testing SD-JWT tokens
+- Allows customization of issuer and holder identifiers
 
 ## Installation
 
@@ -91,31 +92,54 @@ npm run dev
 
 ## SD-JWT Format
 
-The SD-JWT format follows the specification:
+The SD-JWT format combines a JWT with encoded disclosures following the specification:
 
 ```
 <JWT>~<disclosure>~<disclosure>~...
 ```
 
 Where:
-- `<JWT>` is a standard JWT signed token containing `_sd` and `_sd_alg` fields
-- Each `<disclosure>` is a base64url-encoded JSON array of [salt, claim_name, claim_value]
-- The `_sd` array contains SHA-256 hashes of each disclosure
+- `<JWT>` is a standard JWT signed token containing the `_sd` and `_sd_alg` fields
+- Each `<disclosure>` is a base64url-encoded JSON array: `[salt, claim_name, claim_value]`
+- The `_sd` array contains SHA-256 hashes of each disclosure JSON representation
+- Each disclosure hash is used to verify authenticity during selective sharing
+
+## Selective Disclosure Process
+
+1. **Disclosure Creation**:
+   - For each credential field, a random salt is generated
+   - The disclosure triplet `[salt, key, value]` is formed and hashed
+   - Hash is stored in `_sd` array within the credential
+
+2. **Verification**:
+   - When a disclosure is shared, the verifier hashes it
+   - The hash is compared against values in the `_sd` array
+   - If the hash matches, the disclosure is verified as part of the original credential
 
 ## Verification
 
-A simple verification page is available at `/verify` where you can:
-1. Paste the SD-JWT token
-2. Provide the public key
-3. View the decoded token information
+A browser-based verification page is available at `/verify` where you can:
+1. Paste the complete SD-JWT token
+2. Provide the public key (optional for format verification)
+3. View decoded credentials with headers, payload, and disclosures
 
 ## Implementation Details
 
-- Uses RSA key pair (auto-generated on first run) for JWT signing
-- Keys are stored in the `keys/` directory
-- Implements the [SD-JWT format](https://www.ietf.org/archive/id/draft-fett-selective-disclosure-jwt-00.html) for selective disclosure
-- Creates salted and hashed disclosures for credential fields
-- Allows customization of issuer and holder identifiers
+- **Cryptographic Algorithms**:
+  - RSA-256 (RS256) for JWT signing
+  - SHA-256 for disclosure hashing
+  - Cryptographically secure random generation for salts
+  - 2048-bit RSA key pairs for signing
+
+- **Key Management**:
+  - RSA key pair (auto-generated on first run)
+  - Keys are stored in the `keys/` directory
+  - Public key is provided with responses for verification
+
+- **SD-JWT Standard**:
+  - Implements the [SD-JWT specification](https://www.ietf.org/archive/id/draft-fett-selective-disclosure-jwt-00.html)
+  - Uses proper base64url encoding for all components
+  - Follows the standard disclosure format
 
 ## Testing
 
@@ -127,12 +151,14 @@ node test-api.js
 
 This will:
 1. Send a sample request to the API
-2. Display the generated SD-JWT
+2. Display the generated SD-JWT token
 3. Show the disclosures and verification info
+4. Provide instructions to test in the verification page
 
 ## Security Considerations
 
 - Keys are stored in the local filesystem (for production, consider a secure key management system)
-- JWT tokens are signed with RSA-256
+- JWT tokens are signed with RSA-256 with 2048-bit keys
 - Default expiration is set to 1 year (configurable)
-- Provides selective disclosure for privacy preservation
+- Provides selective disclosure for enhanced privacy
+- Uses cryptographically secure random generation for all salts
