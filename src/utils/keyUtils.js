@@ -18,9 +18,14 @@ function ensureKeyDir() {
   const gitignorePath = path.join(__dirname, '../../.gitignore');
   if (fs.existsSync(gitignorePath)) {
     const gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
-    if (!gitignoreContent.includes('/keys/')) {
-      console.warn('\x1b[33m%s\x1b[0m', 'WARNING: keys directory not found in .gitignore!');
-      console.warn('\x1b[33m%s\x1b[0m', 'Add "/keys/" to your .gitignore file to prevent accidentally committing keys.');
+    if (!gitignoreContent.includes('/keys/private') && !gitignoreContent.includes('/keys/*.key')) {
+      console.warn('\x1b[33m%s\x1b[0m', 'WARNING: private keys may not be properly ignored in .gitignore!');
+      console.warn('\x1b[33m%s\x1b[0m', 'Please ensure your .gitignore contains rules to ignore private keys while allowing public keys.');
+      console.warn('\x1b[33m%s\x1b[0m', 'Recommended configuration:');
+      console.warn('\x1b[33m%s\x1b[0m', '/keys/private*');
+      console.warn('\x1b[33m%s\x1b[0m', '/keys/*private*');
+      console.warn('\x1b[33m%s\x1b[0m', '/keys/*.key');
+      console.warn('\x1b[33m%s\x1b[0m', '!/keys/public*');
     }
   }
 
