@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Verifiable Credential SD-JWT Generator
 
 A production-ready Node.js API for generating Verifiable Credentials using the SD-JWT format that enables selective disclosure of credential fields.
@@ -137,6 +136,3 @@ This will:
 - JWT tokens are signed with RSA-256
 - Default expiration is set to 1 year (configurable)
 - Provides selective disclosure for privacy preservation
-=======
-# vc-sd-jwt
->>>>>>> 9b348f88c1e628c8a2f3e10ff7332c0d1aa3c796
