@@ -1,17 +1,32 @@
 const http = require('http');
 
 const data = JSON.stringify({
-  // Credential subject data
-  credentialSubject: {
-    name: "Abhishek Patel",
-    email: "abhishek.patel@viitor.cloud",
-    score: "90.10%",
-    employeeId: "EMP123456",
-    department: "Engineering"
+  "@context": ["https://www.w3.org/ns/credentials/v2", "https://w3id.org/everycred/v1"],
+  "type": ["VerifiableCredential", "EveryCREDCredential"],
+  "issuer": {
+    "id": "did:evrc:issuer:polygon:f5fd0bfb-f2dd-4a5a-b4b5-e59b6c18fe79",
+    "profile": "https://fractal.everycred.com/issuer/profiles/1/CertificationforLaravel.json"
   },
-  // Optional customizations
-  issuer: "did:example:viitorcloud",
-  holder: "did:example:abhishek"
+  "issuanceDate": "2024-12-09T09:39:09Z",
+  "validFrom": "2024-12-09T06:45:00Z",
+  "id": "urn:uuid:e74652ef-fc1d-4e78-89d5-c47772082c46",
+  "credentialSubject": {
+    "id": "did:evrc:subject:a9400321-df3b-4773-ae68-34d079a0ccd1",
+    "profile": "https://fractal.everycred.com/subject/profiles/1/LaravelDeveloperCertification.json",
+    "subjectMetaData": {
+      "name": "Ruchit Patel",
+      "email": "ruchit.patel@viitor.cloud",
+      "description": "The above mentioned Developer has demonstrated their expertise...",
+      "badge_name": "Senior Laravel Developer",
+      "score": "91.10%",
+      "date": "2024-09-27",
+      "about_certification": "Senior Laravel Developer"
+    }
+  },
+  "holder": {
+    "id": "did:evrc:holder:b9ed7456-6298-47f6-96d0-6986d847a15a",
+    "profile": "https://fractal.everycred.com/holder/profiles/did:evrc:holder:b9ed7456.json"
+  }
 });
 
 const options = {
@@ -38,14 +53,13 @@ const req = http.request(options, (res) => {
     const parsedResponse = JSON.parse(responseData);
 
     console.log('\n=== SD-JWT Token ===');
-    console.log(parsedResponse.sd_jwt);
+    console.log(parsedResponse._sd_jwt);
 
-    console.log('\n=== Disclosures ===');
-    console.log(parsedResponse.disclosures);
+    console.log('\n=== SD Digest Array ===');
+    console.log(parsedResponse._sd);
 
-    console.log('\n=== Verification Info ===');
-    console.log(`Issuer: ${parsedResponse.verification.issuer}`);
-    console.log(`Format: ${parsedResponse.verification.format}`);
+    console.log('\n=== SD Algorithm ===');
+    console.log(parsedResponse._sd_alg);
 
     console.log('\nSave the SD-JWT token and test it at http://localhost:3000/verify');
   });
@@ -58,4 +72,4 @@ req.on('error', (error) => {
 req.write(data);
 req.end();
 
-console.log('Sending request to generate VC...');
+console.log('Sending request to generate VC with new template format...');
