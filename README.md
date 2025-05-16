@@ -1,16 +1,16 @@
 # Verifiable Credential SD-JWT Generator
 
-A production-ready Node.js API for generating Verifiable Credentials using the SD-JWT format that enables selective disclosure of credential fields.
+A Node.js API for generating and verifying Verifiable Credentials using the SD-JWT format that enables selective disclosure of credential fields.
 
 ## Features
 
 - Generates cryptographically signed Verifiable Credentials with selective disclosure support
-- Uses RSA-256 (RS256) for secure JWT signing with 2048-bit keys
+- Uses RSA-256 (RS256) for JWT signing with 2048-bit keys
 - Implements SHA-256 hashing for credential field disclosures
 - Creates salted and hashed disclosures with cryptographically secure random values
 - Returns the complete SD-JWT format with encoded disclosures
 - Provides web-based verification interface for testing SD-JWT tokens
-- Allows customization of issuer and holder identifiers
+- Supports EveryCRED credential format with subjectMetaData selective disclosure
 
 ## Installation
 
@@ -35,15 +35,32 @@ npm run dev
 
 ```json
 {
-  "credentialSubject": {
-    "name": "Ruchit Patel",
-    "email": "ruchit.patel@viitor.cloud",
-    "score": "91.10%",
-    "employeeId": "EMP123456",
-    "department": "Engineering"
+  "@context": ["https://www.w3.org/ns/credentials/v2", "https://w3id.org/everycred/v1"],
+  "type": ["VerifiableCredential", "EveryCREDCredential"],
+  "issuer": {
+    "id": "did:evrc:issuer:ethereum:78a31b4c-c892-47fd-a9a2-3b96c9cfd68e",
+    "profile": "https://credentials.everycred.com/issuer/profiles/1/CertificationforReactJS.json"
   },
-  "issuer": "did:example:viitorcloud",
-  "holder": "did:example:ruchit"
+  "issuanceDate": "2025-03-15T14:22:31Z",
+  "validFrom": "2025-03-15T12:00:00Z",
+  "id": "urn:uuid:c982a45d-3f8b-42e7-b4a7-982c536df910",
+  "credentialSubject": {
+    "id": "did:evrc:subject:b7345ef9-2c1a-4d87-91f5-8e692108c7d3",
+    "profile": "https://credentials.everycred.com/subject/profiles/1/ReactJSDeveloperCertification.json",
+    "subjectMetaData": {
+      "name": "Alex Johnson",
+      "email": "alex.johnson@example.com",
+      "description": "The above mentioned Developer has demonstrated outstanding skills in React development...",
+      "badge_name": "Senior React Developer",
+      "score": "94.75%",
+      "date": "2025-02-28",
+      "about_certification": "Advanced React JS Development"
+    }
+  },
+  "holder": {
+    "id": "did:evrc:holder:c4f89d23-9a17-48e5-b38c-75f90e7a6b2c",
+    "profile": "https://credentials.everycred.com/holder/profiles/did:evrc:holder:c4f89d23.json"
+  }
 }
 ```
 
@@ -51,42 +68,17 @@ npm run dev
 
 ```json
 {
-  "sd_jwt": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDpleGFtcGxlOnZpaXRvcmNsb3VkI2tleS0xIn0.eyJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvbnMvY3JlZGVudGlhbHMvdjIiLCJodHRwczovL3czaWQub3JnL3NlY3VyaXR5L3N1aXRlcy9qd3MtMjAyMC92MSJdLCJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIl0sImlzc3VlciI6ImRpZDpleGFtcGxlOnZpaXRvcmNsb3VkIiwiaXNzdWFuY2VEYXRlIjoiMjAyMy0xMC0yNVQxMDozNToyMS4zOTRaIiwiY3JlZGVudGlhbFN1YmplY3QiOnsiaWQiOiJkaWQ6ZXhhbXBsZTpydWNoaXQiLCJfc2QiOlsiWVlYc1JuUGlITWNUZUNpN20xM1hUU3pQa0dsVHJNRjFQNTVOWEhWSkQwayIsIjkxaTF2bUxNcVhSV04zSlJUbTlYZlZrNExRLWNGTzFBbmxGME9YYm02N1EiLCJBWkc1TlNJckFoTHVPNmVjNk42eE80WnpkWVRYTDNrM1hTcGxKUGJHLU8wIiwiakZCbDIzNDEyZVVKV0dZIiwiYXpyaHJtYXhqa1VCSCJdLCJfc2RfYWxnIjoic2hhLTI1NiJ9LCJleHAiOjE3MjkzNjAxMjF9.Rkqpw1lXnvGtfzBl1qJ8qOBxeCqSIjw38vxuRbJ-9aWQ5TG_aKa-nz-JzLQ~WyJ5NGlHVno0eE85IiwibmFtZSIsIlJ1Y2hpdCBQYXRlbCJd~WyJwWlRHOC1qX1lBIiwiZW1haWwiLCJydWNoaXQucGF0ZWxAdmlpdG9yLmNsb3VkIl0~WyJqRkI4NVVKV0dZIiwic2NvcmUiLCI5MS4xMCUiXQ~WyJpbmxrYW1zNUg0MiIsImVtcGxveWVlSWQiLCJFTVAxMjM0NTYiXQ~WyI0OEtodE50ck01ZSIsImRlcGFydG1lbnQiLCJFbmdpbmVlcmluZyJd",
-
-  "vc": {
-    "@context": [
-      "https://www.w3.org/ns/credentials/v2",
-      "https://w3id.org/security/suites/jws-2020/v1"
-    ],
-    "type": ["VerifiableCredential"],
-    "issuer": "did:example:viitorcloud",
-    "issuanceDate": "2023-10-25T10:35:21.394Z",
-    "credentialSubject": {
-      "id": "did:example:ruchit",
-      "_sd": [
-        "YYXsRnPiHMcTeCi7m13XTSzPkGlTrMF1P55NXHVJD0k",
-        "91i1vmLMqXRWN3JRTm9XfVk4LQ-cFO1AnlF0OXbm67Q",
-        "AZG5NSIrAhLuO6ec6N6xO4ZzdYTXL3k3XSplJPbG-O0",
-        "jFBl23412eUJWGY",
-        "azrhrmaxjkUBH"
-      ],
-      "_sd_alg": "sha-256"
-    }
-  },
-
-  "disclosures": [
-    ["y4iGVz4xO9", "name", "Ruchit Patel"],
-    ["pZTG8-j_YA", "email", "ruchit.patel@viitor.cloud"],
-    ["jFB85UJWGY", "score", "91.10%"],
-    ["inlkams5H42", "employeeId", "EMP123456"],
-    ["48KhtNtrM5e", "department", "Engineering"]
+  "_sd_jwt": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDpldnJjOmlzc3VlcjpldGhlcmV1bTo3OGEzMWI0Yy1jODkyLTQ3ZmQtYTlhMi0zYjk2YzljZmQ2OGUja2V5LTEifQ...[truncated]~WyJhQjRUdVp4NzJOOCIsImRhdGUiLCIyMDI1LTAyLTI4Il0~WyI5cVJYc25qazZiTyIsImFib3V0X2NlcnRpZmljYXRpb24iLCJBZHZhbmNlZCBSZWFjdCBKUyBEZXZlbG9wbWVudCJd~[more disclosures]",
+  "_sd": [
+    "d3BTVnQ4eGpSZzRUeXd1eUsxZHBCVXc2Z3BFOFMyckpmX1k5c21PUkR5MA",
+    "blF1dElGLVdHWGhwcDFuSWVlYlFmT3lZQXNDdWotWDhzZnhoRmtxbEs5UQ",
+    "LVlsOTZTelBwVFRCRk5MNXRNZEhvX3I5R1FvbXJ2VVpIWTZiQ1pINU1rTQ",
+    "YVJnLVczcEVFQmVVZFBDUUl2ZURyMWRaNEJBaV9sRnVLaVRGOVh3LTdsMA",
+    "ZXpYSEpoVGgzR2ZRdWdLX2p0SmJhSENVMWxRS1Z3WXNiWlhOUlpKZnJxbw",
+    "cFVXYXplUXUyQTJoSGdQM2doZUdqeXBDNWU2bUVXcUJheV9TVGRacGNpVQ",
+    "NUxnNEVqempJcF9McUlOMUJzZUl2VUs5dUlSaWxXV1p5SXdsNnpzeGpQUQ"
   ],
-
-  "verification": {
-    "issuer": "did:example:viitorcloud",
-    "publicKey": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BA...",
-    "format": "SD-JWT format: <JWT>~<disclosure>~<disclosure>~..."
-  }
+  "_sd_alg": "sha-256"
 }
 ```
 
@@ -99,6 +91,7 @@ The SD-JWT format combines a JWT with encoded disclosures following the specific
 ```
 
 Where:
+
 - `<JWT>` is a standard JWT signed token containing the `_sd` and `_sd_alg` fields
 - Each `<disclosure>` is a base64url-encoded JSON array: `[salt, claim_name, claim_value]`
 - The `_sd` array contains SHA-256 hashes of each disclosure JSON representation
@@ -107,21 +100,42 @@ Where:
 ## Selective Disclosure Process
 
 1. **Disclosure Creation**:
-   - For each credential field, a random salt is generated
-   - The disclosure triplet `[salt, key, value]` is formed and hashed
-   - Hash is stored in `_sd` array within the credential
+   - Fields within `credentialSubject.subjectMetaData` are extracted for selective disclosure
+   - For each field, a random salt is generated using crypto.randomBytes
+   - The disclosure triplet `[salt, key, value]` is formed and hashed with SHA-256
+   - Hash is stored in `_sd` array within the credential subject
+   - The original `subjectMetaData` object is removed from the credential
 
 2. **Verification**:
    - When a disclosure is shared, the verifier hashes it
    - The hash is compared against values in the `_sd` array
    - If the hash matches, the disclosure is verified as part of the original credential
 
-## Verification
+## Credential Structure
+
+The credential structure follows the EveryCRED format:
+
+- Standard W3C Verifiable Credential fields
+- Nested issuer, holder, and subject objects with DIDs and profiles
+- `subjectMetaData` containing all selectively disclosable credential attributes
+- During processing, `subjectMetaData` is replaced with `_sd` and `_sd_alg` properties
+
+## Verification Interface
 
 A browser-based verification page is available at `/verify` where you can:
+
 1. Paste the complete SD-JWT token
-2. Provide the public key (optional for format verification)
+2. Provide the public key for signature verification
 3. View decoded credentials with headers, payload, and disclosures
+4. Verify the authenticity of individual disclosures
+
+The verification interface supports:
+
+- JWT signature verification using Web Crypto API
+- Expiration and issuance date validation
+- Disclosure hash verification
+- Optional skipping of signature verification
+- Detailed status reporting for each verification step
 
 ## Implementation Details
 
@@ -134,12 +148,12 @@ A browser-based verification page is available at `/verify` where you can:
 - **Key Management**:
   - RSA key pair (auto-generated on first run)
   - Keys are stored in the `keys/` directory
-  - Public key is provided with responses for verification
+  - Keys directory is excluded from git via .gitignore
 
 - **SD-JWT Standard**:
-  - Implements the [SD-JWT specification](https://www.ietf.org/archive/id/draft-fett-selective-disclosure-jwt-00.html)
   - Uses proper base64url encoding for all components
   - Follows the standard disclosure format
+  - Preserves the original credential structure while enabling privacy through selective disclosure
 
 ## Testing
 
@@ -150,9 +164,10 @@ node test-api.js
 ```
 
 This will:
-1. Send a sample request to the API
+
+1. Send a sample request to the API with the EveryCRED credential template
 2. Display the generated SD-JWT token
-3. Show the disclosures and verification info
+3. Show the SD digest array and algorithm used
 4. Provide instructions to test in the verification page
 
 ## Security Considerations
@@ -160,5 +175,27 @@ This will:
 - Keys are stored in the local filesystem (for production, consider a secure key management system)
 - JWT tokens are signed with RSA-256 with 2048-bit keys
 - Default expiration is set to 1 year (configurable)
-- Provides selective disclosure for enhanced privacy
 - Uses cryptographically secure random generation for all salts
+- Maintains compatibility with standard SD-JWT verifiers
+- The verification UI provides detailed error messages for troubleshooting
+
+## Project Structure
+
+```
+├── keys/             # Auto-generated directory for cryptographic keys
+├── public/           # Web-based verification interface files
+│   ├── index.html    # Verification page HTML
+│   ├── script.js     # Verification client-side logic
+│   └── styles.css    # Verification page styling
+├── src/              # Server-side code
+│   ├── app.js        # Express server entry point
+│   ├── routes/       # API route handlers
+│   │   └── vcGenerator.js # VC generation endpoint
+│   └── utils/        # Helper utilities
+│       ├── keyUtils.js  # Key management functions
+│       └── sdUtils.js   # SD-JWT utilities
+├── .gitignore        # Git ignore rules (includes keys directory)
+├── package.json      # Project dependencies and scripts
+├── README.md         # Project documentation
+└── test-api.js       # API test script
+```

@@ -1,17 +1,32 @@
 const http = require('http');
 
 const data = JSON.stringify({
-  // Credential subject data
-  credentialSubject: {
-    name: "Abhishek Patel",
-    email: "abhishek.patel@viitor.cloud",
-    score: "90.10%",
-    employeeId: "EMP123456",
-    department: "Engineering"
+  "@context": ["https://www.w3.org/ns/credentials/v2", "https://w3id.org/everycred/v1"],
+  "type": ["VerifiableCredential", "EveryCREDCredential"],
+  "issuer": {
+    "id": "did:evrc:issuer:ethereum:78a31b4c-c892-47fd-a9a2-3b96c9cfd68e",
+    "profile": "https://credentials.everycred.com/issuer/profiles/1/CertificationforReactJS.json"
   },
-  // Optional customizations
-  issuer: "did:example:viitorcloud",
-  holder: "did:example:abhishek"
+  "issuanceDate": "2025-03-15T14:22:31Z",
+  "validFrom": "2025-03-15T12:00:00Z",
+  "id": "urn:uuid:c982a45d-3f8b-42e7-b4a7-982c536df910",
+  "credentialSubject": {
+    "id": "did:evrc:subject:b7345ef9-2c1a-4d87-91f5-8e692108c7d3",
+    "profile": "https://credentials.everycred.com/subject/profiles/1/ReactJSDeveloperCertification.json",
+    "subjectMetaData": {
+      "name": "Alex Johnson",
+      "email": "alex.johnson@example.com",
+      "description": "The above mentioned Developer has demonstrated outstanding skills in React development...",
+      "badge_name": "Senior React Developer",
+      "score": "94.75%",
+      "date": "2025-02-28",
+      "about_certification": "Advanced React JS Development"
+    }
+  },
+  "holder": {
+    "id": "did:evrc:holder:c4f89d23-9a17-48e5-b38c-75f90e7a6b2c",
+    "profile": "https://credentials.everycred.com/holder/profiles/did:evrc:holder:c4f89d23.json"
+  }
 });
 
 const options = {
@@ -38,14 +53,13 @@ const req = http.request(options, (res) => {
     const parsedResponse = JSON.parse(responseData);
 
     console.log('\n=== SD-JWT Token ===');
-    console.log(parsedResponse.sd_jwt);
+    console.log(parsedResponse._sd_jwt);
 
-    console.log('\n=== Disclosures ===');
-    console.log(parsedResponse.disclosures);
+    console.log('\n=== SD Digest Array ===');
+    console.log(parsedResponse._sd);
 
-    console.log('\n=== Verification Info ===');
-    console.log(`Issuer: ${parsedResponse.verification.issuer}`);
-    console.log(`Format: ${parsedResponse.verification.format}`);
+    console.log('\n=== SD Algorithm ===');
+    console.log(parsedResponse._sd_alg);
 
     console.log('\nSave the SD-JWT token and test it at http://localhost:3000/verify');
   });
@@ -58,4 +72,4 @@ req.on('error', (error) => {
 req.write(data);
 req.end();
 
-console.log('Sending request to generate VC...');
+console.log('Sending request to generate VC with new template format...');
