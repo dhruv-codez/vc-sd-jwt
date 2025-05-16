@@ -2,20 +2,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
 const vcGenerator = require("./routes/vcGenerator");
-const { getKeyPair } = require("./utils/keyUtils");
 
 // Initialize the app
 const app = express();
-
-// Generate keys on startup
-console.log("Initializing cryptographic keys...");
-try {
-  const { privateKey, publicKey } = getKeyPair();
-  console.log("Cryptographic keys ready");
-} catch (error) {
-  console.error("Failed to initialize keys:", error);
-  process.exit(1);
-}
 
 // Parse JSON bodies
 app.use(bodyParser.json());
@@ -27,7 +16,7 @@ app.use("/api", vcGenerator);
 app.use("/verify", express.static(path.join(__dirname, "../public")));
 
 // Basic root route for health check
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.json({
     status: "OK",
     message: "VC Generator API is running",
